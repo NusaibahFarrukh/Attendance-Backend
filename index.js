@@ -14,6 +14,7 @@ const env = process.env.NODE_ENV || 'prod'
 //Routes file configuration
 const { userRoutes } = require('./routes/user');
 const { teacherRoutes } = require('./routes/teacher');
+const { staffRoutes } = require('./routes/staff');
 const { studentRoutes } = require('./routes/student'); 
 
 app.use(cors())
@@ -27,6 +28,7 @@ app.get('/', (req, res) => {
 
 app.use('/user', userRoutes);
 app.use('/teacher', teacherRoutes)
+app.use('/staff', staffRoutes)
 app.use('/student', studentRoutes)
 
 

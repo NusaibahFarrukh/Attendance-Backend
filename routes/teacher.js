@@ -95,24 +95,60 @@ router.get('/getTeachersClass', async (req, res) => {
 
 router.get('/addStudent', async (req, res) => {
     try {
-        let data = {
-            _id: uuid(),
-            name: req.query.name,
-            email: req.query.email,
-            role: "student",
-            subrole: "student",
-            class: req.query.class,
-            timestamp: new Date().toString()
-        }
-        console.log("Data to insert to the DB: ", data)
+        let email = req. query.email
 
-        let insertedData = await db.getDb().collection('users').insertOne(data)
-        console.log(insertedData)
+        // search the user with email
+        let user = await db.getDb().collection('users').findOne({email})
+        let data;
+        if (!user) {
+            data = {
+                _id: uuid(),
+                name: req.query.name,
+                email: req.query.email,
+                role: "student",
+                subrole: "student",
+                class: [req.query.class],
+                timestamp: new Date().toString()
+            }
+            console.log("Data to insert to the DB: ", data)
+
+            let insertedData = await db.getDb().collection('users').insertOne(data)
+            console.log(insertedData)
+            res.status(200).send({
+                status: 200,
+                success: true,
+                message: "Student Added Successfully",
+                id: insertedData.insertedId
+            })
+        } else {
+            let userClass = user.class
+            userClass.push(req.query.class)
+            
+            // update the user
+            let updatedData = await db.getDb().collection('users').updateOne({email}, {$set: {class: userClass}})
+            res.status(200).send({
+                status: 200,
+                success: true,
+                message: "Student Added Successfully",
+                id: updatedData
+            })
+        }
+    } catch(err) {
+        console.log(err)
+        res.status(500).send(err)
+    }
+})
+
+router.get('/getClassStudents', async (req, res) => {
+    try {
+        let classId = req.query.classId;
+        let classStudents = await db.getDb().collection('users').find({class:classId}).toArray()
+
         res.status(200).send({
             status: 200,
             success: true,
-            message: "Student Added Successfully",
-            id: insertedData.insertedId
+            message: "Class Students found",
+            data: classStudents
         })
     } catch(err) {
         console.log(err)
